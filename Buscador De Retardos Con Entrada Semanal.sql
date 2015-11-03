@@ -12,7 +12,7 @@ GO
 -- Description:	Procedimeinto para revisar si los empleados han realizado chequeo 
 --				en el reloj checador en el horario que les corresponde.
 -- =============================================
-ALTER PROCEDURE [dbo].[Buscador_De_Retardos_EntradaSemanal]
+CREATE PROCEDURE [dbo].[Buscador_De_Retardos_EntradaSemanal]
 
 AS
 
@@ -78,11 +78,11 @@ WITH EntradaOrdenada AS (
     SET @ClaveEmpleadoChar = CONVERT(VARCHAR(8), @ClaveEmpleado)
 ------------------------------------------------------------------------------------------------------------------------------
         --Seleccionar el departamento al cual pertenece el empleado
-    SELECT @Departamento_De_Empleado = Departamento FROM nomemp WHERE
+    SELECT @Departamento_De_Empleado = Departamento FROM RHNomEmpleados WHERE
     LTRIM(RTRIM(replace(replace(replace(ClaveNomina, char(9),''), char(10),''), char(13),''))) = @ClaveEmpleadoChar
     
     --Busacar si checa tarjeta
-    SELECT @ChecaTarjeta = ChecaTarjeta FROM nomemp WHERE 
+    SELECT @ChecaTarjeta = ChecaTarjeta FROM RHNomEmpleados WHERE 
     LTRIM(RTRIM(replace(replace(replace(ClaveNomina, char(9),''), char(10),''), char(13),''))) = @ClaveEmpleadoChar
  -----------------------------------------------------------------------------------------------------------------------------
  
