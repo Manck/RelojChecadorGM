@@ -1,0 +1,3 @@
+Se requiere de un procedimiento almacenado por cada horario fijo, o en su defecto que el procedimiento tenga diferentes secciones para cada área u horario. 
+
+4 de Noviembre de 2015
