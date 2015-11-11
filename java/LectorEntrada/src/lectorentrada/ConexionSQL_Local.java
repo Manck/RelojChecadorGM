@@ -1,15 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package lectorentrada;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  *
@@ -18,10 +15,12 @@ import javax.swing.JOptionPane;
 public class ConexionSQL_Local {
         public static Connection alternativeConnection() throws Exception{
         Connection conexion=null;
-        
+                ObjectMapper mapperLectura = new ObjectMapper(); // can reuse, share globally
+                ConfigLectura configLectura = mapperLectura.readValue(new File("C:\\Program Files\\LectorHuella\\ConfiguracionLocal.json"), ConfigLectura.class);
         try{
     	    Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-    	    String url = "jdbc:sqlserver://localhost;databaseName=TCADBGNS;user=sa;password=tinkblucon2;";
+    	    String url = "jdbc:sqlserver:// "+ configLectura.getIp()+" ;databaseName= "+configLectura.getBasedatos()+" ; "
+            + "user= "+configLectura.getUsuario()+" ;password = " +configLectura.getPassword()+ ";";
     	    conexion= DriverManager.getConnection(url);
     	    //System.out.println("Conexión con SQL Server Exitosa");
     	}

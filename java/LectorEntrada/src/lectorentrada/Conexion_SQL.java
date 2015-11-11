@@ -26,15 +26,12 @@ public class Conexion_SQL {
     @SuppressWarnings("finally")
     public static Connection createConnection() throws Exception {
     	        Connection conexion=null;
-//                ObjectMapper mapperLectura = new ObjectMapper(); // can reuse, share globally
-//                ConfigLectura configLectura = mapperLectura.readValue(new File("C:\\Program Files\\AvisoPagos\\ConfigLectura.json"), ConfigLectura.class);
-//    	        String host = configLectura.getHost();
-//                ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-//                Configuracion config = mapper.readValue(new File("C:\\Users\\"+host+"\\Documents\\ConfiguracionCXP\\Configuracion.json"), Configuracion.class);
-
+                ObjectMapper mapperLectura = new ObjectMapper();
+                Configuracion configJSON = mapperLectura.readValue(new File("C:\\Program Files\\LectorHuella\\ConfiguracionRemota.json"), Configuracion.class);
                try{
     	            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-    	            String url = "jdbc:sqlserver://10.106.18.40;databaseName=TCADBGNS;user=sa;password=tinkblucon2;";
+    	            String url = "jdbc:sqlserver:// "+ configJSON.getIp()+" ;databaseName= "+configJSON.getBasedatos()+" ; "
+                    + "user= "+configJSON.getUsuario()+" ;password = " +configJSON.getPassword()+ ";";
     	            conexion= DriverManager.getConnection(url);
     	            //System.out.println("Conexión con SQL Server Exitosa");
     	        }

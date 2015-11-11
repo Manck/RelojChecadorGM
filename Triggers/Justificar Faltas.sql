@@ -50,16 +50,16 @@ Fecha >= @FechaInicio AND Fecha <= @FechaFin AND Tipo_Alerta = 1;
 	
 --Buscar el nombre del empleado con su clave de nómina; Concatenar nombres y apellidos.
 -- Se utiliza like debido a que se buscan con char(3) en un campo char(8) y tiene valores diferentes.
-SELECT @Nombre_Subordinado = Nombre + ' ' + Paterno + ' ' + Materno FROM RHNomEmpleados
-WHERE ClaveNomina LIKE '%' + LTRIM(RTRIM(@Clave)) + '%'
+SELECT @Nombre_Subordinado = Nombre + ' ' + Paterno + ' ' + Materno FROM RHNomEmpleadosP
+WHERE ClaveNomina = LTRIM(RTRIM(@Clave)) 
  
- --Buscar el correo del jefe utilizando la tabla Relacion_Jefe_Emp con el dato de la clave de nomina del empleado.
---SELECT @CorreoDeJefe = Correo FROM Correo_Jefes WHERE Jefe = 
---(SELECT Jefe FROM Relacion_Jefe_Emp WHERE @Clave LIKE '%' + LTRIM(RTRIM(Subordinado)) + '%');
+ --Buscar el puesto del empleado.
+SELECT @Puesto_de_Empleado = Nombre FROM RHNomPuestos WHERE Puesto = (SELECT Puesto FROM RHNomEmpleadosP WHERE 
+ClaveNomina = LTRIM(RTRIM(@Clave)));
 
---Buscar el puesto del empleado.
-SELECT @Puesto_de_Empleado = Nombre FROM RHNomPuestos WHERE Puesto = (SELECT Puesto FROM RHNomEmpleados WHERE 
-ClaveNomina LIKE '%' + LTRIM(RTRIM(@Clave)) + '%');
+ --Buscar el correo del jefe utilizando la tabla Relacion_Jefe_Emp con el dato de la clave de nomina del empleado.
+SELECT @CorreoDeJefe = Correo FROM Correo_Jefes WHERE Jefe IN
+(SELECT Jefe FROM Relacion_Jefe_Emp WHERE Subordinado = @Puesto_de_Empleado)
 
 --Formular el cuerpo del correo en caso de falta de un solo día
 SET @Cuerpo_Mensaje_UnaFalta = 'El Empleado ' + @Nombre_Subordinado +

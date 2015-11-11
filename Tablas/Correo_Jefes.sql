@@ -12,7 +12,7 @@ SET ANSI_PADDING ON
 GO
 
 CREATE TABLE [dbo].[Correo_Jefes](
-	[Jefe] [char](3) NOT NULL,
+	[Jefe] [char](6) NOT NULL,
 	[Correo] [varchar](40) NOT NULL
 ) ON [PRIMARY]
 

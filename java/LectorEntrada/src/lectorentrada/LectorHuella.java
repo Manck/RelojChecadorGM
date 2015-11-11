@@ -13,13 +13,13 @@ import com.digitalpersona.onetouch.processing.DPFPImageQualityException;
 import com.digitalpersona.onetouch.verification.DPFPVerification;
 import com.digitalpersona.onetouch.verification.DPFPVerificationResult;
 import java.awt.AWTException;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Robot;
-import java.awt.Toolkit;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.awt.event.WindowStateListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -38,17 +39,16 @@ public class LectorHuella {
     //Frame del programa
     JFrame frame = new JFrame();
     //Define si el programa se encuentra en el proceso de lectura de una huella
-    Boolean noLeeHuella = true;
+    boolean noLeeHuella = true;
     String[] huellasAVerificar;
     //Timer para levantar java automáticamente en caso de que pierda el focus y no se pueda recuperar.
-    //Timer timerEjecucionEnvio = new Timer();
+    Timer timerEjecucionEnvio = new Timer();
     LectorHuella(){
         //Colocar la ventana del tamaño de la mitad vertical de la pantalla
-        frame.setSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width, 2));
+        frame.setSize(new Dimension(4, 4));
+        frame.setBackground(Color.WHITE);
         //Evitar que se pueda cerrar accidentalmente
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        //Colocar siempre encima de todas las ventanas
-        //frame.setAlwaysOnTop(true);
         //Evitar que se pueda cambiar el tamaño
         frame.setResizable(false);
         //Colocar como no decorado para lograr máxima invisibilidad
@@ -60,20 +60,11 @@ public class LectorHuella {
         
         //Colocar los eventos de cambio de focus
         WindowFocusListener listenerDeFocus = new WindowFocusListener() {
-
             @Override
             public void windowGainedFocus(WindowEvent e) {}
-
             @Override
-            public void windowLostFocus(WindowEvent e) {
-                
+            public void windowLostFocus(WindowEvent e) {   
                 if(noLeeHuella){
-                    try {
-                        //try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(LectorHuella.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                     RecuperarFocusJava();
                 }  
             }
@@ -92,8 +83,7 @@ public class LectorHuella {
             huellasAVerificar[9] = "meniqueIzquierdo";
         //Añadir el listener de focus a frame
         frame.addWindowFocusListener(listenerDeFocus);
-        //timerEjecucionEnvio.schedule(colocarFocusEnJavaAutomaticamente, 0l, 3000);
-        
+        timerEjecucionEnvio.schedule(colocarFocusEnJavaAutomaticamente, 0l, 1000);
     }
     
     //Coloca como iniciado el objeto de captura de la huella
@@ -113,9 +103,7 @@ public class LectorHuella {
             String claveNomina;
             boolean SeHaEncontradoLaHuella = false;
             for(int i = 0; i < huellasAVerificar.length; i++){
-                //JOptionPane.showMessageDialog(frame, huellasAVerificar[i]);
                 resultadoBusqueda = procesarHuella(e.getSample(), huellasAVerificar[i]);
-                //JOptionPane.showMessageDialog(frame, "Boolean "+ String.valueOf((boolean) resultadoBusqueda.get(0)));
                 SeHaEncontradoLaHuella = (boolean) resultadoBusqueda.get(0);
                 if(SeHaEncontradoLaHuella){
                     claveNomina = (String) resultadoBusqueda.get(1); 
@@ -183,70 +171,30 @@ public class LectorHuella {
         
     //Utilizar un robot para enviar la clave del empleado al reloj
     private void enviarDatoAReloj(String claveNomina) throws IOException, AWTException{
-        //System.out.println("huesha");      
-        Robot robot = new Robot();
-        ArrayList<Integer> keyInput = new ArrayList<>();
-        
-        for(int i = 0; i < claveNomina.length(); i++){
-            switch(claveNomina.charAt(i)){
-                case '1':
-                    keyInput.add(KeyEvent.VK_1);
-                break;
-                case '2':
-                    keyInput.add(KeyEvent.VK_2);
-                break;
-                case '3':
-                    keyInput.add(KeyEvent.VK_3);
-                break;
-                case '4':
-                    keyInput.add(KeyEvent.VK_5);
-                break;
-                case '5':
-                    keyInput.add(KeyEvent.VK_5);
-                break;
-                case '6':
-                    keyInput.add(KeyEvent.VK_6);
-                break;
-                case '7':
-                    keyInput.add(KeyEvent.VK_7);
-                break;
-                case '8':
-                    keyInput.add(KeyEvent.VK_8);
-                break;
-                case '9':
-                    keyInput.add(KeyEvent.VK_9);
-                break;
-                case '0':
-                    keyInput.add(KeyEvent.VK_0);
-                break; 
-            }                
-        }
-        keyInput.add(KeyEvent.VK_ENTER);
-        
-        FocusEnReloj();
+        simularClick(400, 300,100);
+        FocusEnReloj();    
         //Esperar a que la ventana esté atrás 
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(LectorHuella.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //Llamar a la clase para escribir
+        RobotThread myRunnable = new RobotThread(claveNomina);
+        new Thread(myRunnable).start();
+        
         try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
             Logger.getLogger(LectorHuella.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        //Enviar click a la ventana de reloj
-        simularClick(((Toolkit.getDefaultToolkit().getScreenSize().width)/2), 
-        ((Toolkit.getDefaultToolkit().getScreenSize().height)/3)*2, 100);
-        
-        for (Integer keyInput1 : keyInput) {
-            robot.keyPress(keyInput1);
-            System.out.println("Tecla presionada");
-            robot.delay(100);
-        }
-        
+      
         try {
-            //no recuerdo porque esta espera
             Thread.sleep(500);
+            noLeeHuella = true;
             RecuperarFocusJava();
         } catch (InterruptedException ex) {}
-        noLeeHuella = true;
     }
     
     //Simular un click en la pantalla para asegurarse que se ha seleccionado la entrada de texto en el reloj
@@ -259,40 +207,49 @@ public class LectorHuella {
             Logger.getLogger(LectorHuella.class.getName()).log(Level.SEVERE, null, ex);
         }
         //Mover el mouse a un punto de la pantalla
-        simuladorClick.mouseMove(x, y);    
+            simuladorClick.mouseMove(x, y); 
         //Dar tiempo al robot para mover el mouse al punto requerido
         try {
-            Thread.sleep(100);
+            Thread.sleep(200);
         } catch (InterruptedException ex) {}
         //simular una presión del mouse y una liberación
         simuladorClick.mousePress(InputEvent.BUTTON1_MASK);
-        simuladorClick.mouseRelease(InputEvent.BUTTON1_MASK);
+        simuladorClick.delay(100);
+        simuladorClick.mouseRelease(InputEvent.BUTTON1_MASK);  
     }
     
     //Invocar un script vbs para colocar el focus en java
     public void RecuperarFocusJava(){
         try {
-            Runtime.getRuntime().exec( "wscript C:\\Users\\fco\\Documents\\JAVA\\CambiarFocusALector.vbs" );
-            //Runtime.getRuntime().exec( "wscript C:\\Users\\Francisco\\Documents\\CambiarFocusALector.vbs" );
+            Runtime.getRuntime().exec(new String[] {
+            "wscript.exe",
+            "C:\\Program Files\\LectorHuella\\CambiarFocusALector.vbs"
+            });
         } catch (IOException ex) {
-            Logger.getLogger(LectorHuella.class.getName()).log(Level.SEVERE, null, ex);
+           JOptionPane.showMessageDialog(frame, "No se encuentra un archivo VBS; Reportar Incidente");
         }
     }
     
     //Invocar un script vbs para colocar el focus en el reloj
     public void FocusEnReloj(){
         try {
-            Runtime.getRuntime().exec( "wscript C:\\Users\\fco\\Documents\\JAVA\\CambiarFocusAReloj.vbs" );
-            //Runtime.getRuntime().exec( "wscript C:\\Users\\Francisco\\Documents\\CambiarFocusAReloj.vbs" );
+            Runtime.getRuntime().exec(new String[] {
+            "wscript.exe",
+            "C:\\Program Files\\LectorHuella\\CambiarFocusAReloj.vbs"
+            });
         }catch( IOException e ) {
-            System.out.println(e);
+            JOptionPane.showMessageDialog(frame, "No se encuentra un archivo VBS; Reportar Incidente");
         }
     }
              
-//    //Proceso a ejecutar continuamente cada tiempo X
-//    TimerTask colocarFocusEnJavaAutomaticamente = new TimerTask () {
-//        @Override
-//        public void run () {
-//        }
-//    };
+    //Proceso a ejecutar continuamente cada segundo para levantar el focus cada vez que se pierde
+    TimerTask colocarFocusEnJavaAutomaticamente = new TimerTask () {
+        @Override
+        public void run () {
+            //Cuando lee huella (o escribe en el reloj) no la levanta, ya que interrumpiría el proceso
+            if(noLeeHuella){
+                RecuperarFocusJava();
+            }
+        }
+    };
 }

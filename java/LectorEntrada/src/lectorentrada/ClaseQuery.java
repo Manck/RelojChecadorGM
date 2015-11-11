@@ -20,12 +20,19 @@ public class ClaseQuery {
     ArrayList<byte[]> byteHuellas = new ArrayList<>();
     ArrayList<String> listaClave = new ArrayList<>();
     ArrayList<ArrayList> resultadoBusqueda = new ArrayList<>();
+    
     ClaseQuery(){
+        //El constructor intenta conectar a la base de datos local
         try {
             Objeto_ConexionSQL = ConexionSQL_Local.alternativeConnection();
-                    //Conexion_SQL.createConnection();
         } catch (Exception ex) {
-            Logger.getLogger(ClaseQuery.class.getName()).log(Level.SEVERE, null, ex);
+            //Si no puede, intenta con la remota
+            try {
+                Objeto_ConexionSQL = Conexion_SQL.createConnection();
+            } catch (Exception ex1) {
+                //Si no puede conectarse con la remota, envía mensaje de error
+                JOptionPane.showMessageDialog(new JFrame(), "Error, no fue posible conectar a ninguna base de datos; Reportar Problema");
+            }
         }
     }
     
